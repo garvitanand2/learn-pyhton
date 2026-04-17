@@ -14,15 +14,18 @@
 # Vision    : True
 # Checkpoint: None
 
+def AI_model_configuration():
+    model_name = "Gemini-Pro";
+    params = 7.0; # in billions
+    context_window_size = 8192; # in tokens
+    supports_vision = True;
+    fine_tune_checkpoint_path = None;
+    print(f"Model     : {model_name}");
+    print(f"Params    : {params}B");
+    print(f"Context   : {context_window_size} tokens");
+    print(f"Vision    : {supports_vision}");
+    print(f"Checkpoint: {fine_tune_checkpoint_path}");
 
-model_name = "Gemini-Pro";
-params = 7.0; # in billions
-context_window_size = 8192; # in tokens
-supports_vision = True;
-fine_tune_checkpoint_path = None;
+AI_model_configuration();
 
-print(f"Model     : {model_name}");
-print(f"Params    : {params}B");
-print(f"Context   : {context_window_size} tokens");
-print(f"Vision    : {supports_vision}");
-print(f"Checkpoint: {fine_tune_checkpoint_path}");
+
