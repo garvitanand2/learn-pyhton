@@ -1,35 +1,173 @@
-# Exercise 5 — Identity Puzzle (Interview-Focused)
-# Predict the output of each line before running it. Then verify:
+# # Day 5 Exercises — Functions (Basics)
 
-# a = 256
-# b = 256
-# print(a is b)   # ?
+# Estimated time: 25–35 minutes
 
-# c = 257
-# d = 257
-# print(c is d)   # ?
 
-# x = None
-# y = None
-# print(x is y)   # ?
+# ## Exercise 1 — Metric Suite
 
-# p = "hello"
-# q = "hello"
-# print(p is q)   # ?  (string interning — research this!)
-# Explain in a comment WHY each result is what it is.
+# Write three separate functions (each as a pure function):
 
-a = 256
-b = 256
-print(a is b)   # True — In Python, small integers (typically between -5 and 256) are cached and reused, so a and b point to the same memory location.
+# 1. `compute_mae(actual, predicted)` → Mean Absolute Error
+# 2. `compute_mse(actual, predicted)` → Mean Squared Error
+# 3. `compute_rmse(actual, predicted)` → RMSE (reuse `compute_mse`)
 
-c = 257
-d = 257
-print(c is d)   # False — Large integers are not cached, so c and d point to different memory locations.
+# Then write a fourth function `compute_all_metrics(actual, predicted)` that calls
+# all three and returns a dictionary:
 
-x = None
-y = None
-print(x is y)   # True — None is a singleton in Python, so x and y point to the same memory location.
+# ```python
+# {"mae": 0.35, "mse": 0.18, "rmse": 0.42}
+# ```
 
-p = "hello"
-q = "hello"
-print(p is q)   # True — String interning is a mechanism where Python automatically reuses string objects for identical string literals, so p and q point to the same memory location.
+# Test with:
+# ```python
+# actual    = [3.0, 5.0, 2.5, 7.0, 4.0]
+# predicted = [2.8, 5.3, 2.0, 6.5, 4.2]
+# ```
+
+def compute_mae(actual, predicted):
+    total_error = 0.0;
+    for a, p in zip(actual, predicted):
+        total_error += abs(a - p);
+    mae = total_error / len(actual);
+    return mae;
+
+def compute_mse(actual, predicted):
+    total_error = 0.0;
+    for a, p in zip(actual, predicted):
+        total_error += (a - p) ** 2;
+    mse = total_error / len(actual);
+    return mse;
+
+def compute_rmse(actual, predicted):
+    mse = compute_mse(actual, predicted);
+    rmse = mse ** 0.5;
+    return rmse;
+
+def compute_all_metrics(actual, predicted):
+    return {
+        "mae": compute_mae(actual, predicted),
+        "mse": compute_mse(actual, predicted),
+        "rmse": compute_rmse(actual, predicted)
+    };
+
+# ## Exercise 2 — Configurable Tokenizer
+
+# Write a function `tokenize(text, lowercase=True, remove_punct=True, split_on=" ")`:
+# - If `lowercase` is True, convert text to lowercase
+# - If `remove_punct` is True, strip punctuation from each token
+# - Split on the given character
+
+# Return a list of non-empty tokens.
+
+# Test:
+# ```python
+# tokenize("Hello, World! How are YOU?")
+# # ['hello', 'world', 'how', 'are', 'you']
+
+# tokenize("Hello, World!", lowercase=False, remove_punct=False)
+# # ['Hello,', 'World!']
+# ```
+
+def tokenize(text, lowercase=True, remove_punct=True, split_on=" "):
+    if lowercase:
+        text = text.lower();
+    tokens = text.split(split_on);
+    if remove_punct:
+        tokens = [token.strip(".,!?;:()[]{}\"'") for token in tokens];
+    return [token for token in tokens if token]; # Remove empty tokens  
+
+
+# ## Exercise 3 — Pipeline Builder
+
+# Create a function `build_pipeline(steps)` that takes a list of functions
+# and returns a new function that applies them in sequence:
+
+# ```python
+# def build_pipeline(steps):
+#     ...
+
+# def lowercase(text): return text.lower()
+# def strip_spaces(text): return text.strip()
+# def remove_exclamation(text): return text.replace("!", "")
+
+# pipeline = build_pipeline([lowercase, strip_spaces, remove_exclamation])
+# result = pipeline("  HELLO WORLD!  ")
+# print(result)   # "hello world"
+# ```
+
+# This is the **functional pipeline pattern** — core to many AI frameworks.
+
+def build_pipeline(steps):
+    def pipeline(input):
+        for step in steps:
+            input = step(input);
+        return input;
+    return pipeline;
+
+
+
+
+# ## Exercise 4 — Scope Puzzle
+
+# Look at this code — predict the output before running it:
+
+# ```python
+# x = 10
+# y = 20
+
+# def outer():
+#     x = 100
+#     def inner():
+#         y = 200
+#         print(f"inner: x={x}, y={y}")
+#     inner()
+#     print(f"outer: x={x}, y={y}")
+
+# outer()
+# print(f"global: x={x}, y={y}")
+# ```
+
+# Write down your predictions. Then run it and explain each output.
+
+# **Bonus**: Modify `inner()` to use `nonlocal x` and predict the new output.
+
+# ---
+
+# ## Exercise 5 — Mutable Default Bug Hunter
+
+# Consider this buggy function:
+
+# ```python
+# def collect_predictions(text, results=[]):
+#     results.append(text)
+#     return results
+
+# r1 = collect_predictions("cat")
+# r2 = collect_predictions("dog")
+# print(r1)   # What do you expect? What actually happens?
+# print(r2)
+# ```
+
+# 1. Run the code and observe the bug
+# 2. Explain WHY it happens
+# 3. Fix it correctly
+
+# ---
+
+# ## Stretch Challenge — Recursive Factorial + Memoization
+
+# 1. Write `factorial(n)` recursively
+# 2. Add a manual cache using a dictionary to avoid recomputing values:
+
+# ```python
+# cache = {}
+
+# def factorial(n, cache=None):
+#     if cache is None:
+#         cache = {}
+#     ...
+# ```
+
+# 3. Time both versions for n=30 using `time.time()` and compare.
+# 4. **Note**: Python's built-in `functools.lru_cache` does this automatically
+#    — you'll learn that on Day 22.
